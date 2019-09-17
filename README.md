@@ -1,8 +1,8 @@
 kids-radio-service
 ==================
 
-First Prototype: Replays audio over and over to test sound output from rpi3 
-when running inside docker container via balena.
+First Prototype: Replays audio once to test sound output from rpi3 
+when running inside docker container via balena
 
 Using, balena-cloud.io.
 

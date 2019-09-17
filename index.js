@@ -30,4 +30,5 @@ function main() {
   // play.sound('./../_temp-kids-radio-files/6 - Benjamin Bluemchen und die Schule INFO.mp3');
 }
 
-setInterval(main, 3000);
+// setInterval(main, 3000);
+main();
