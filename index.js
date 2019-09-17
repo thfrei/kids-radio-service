@@ -1,4 +1,4 @@
-var player = require('play-sound')(opts = {
+const player = require('play-sound')(opts = {
   player: 'mpg123',
 });
 //
@@ -18,8 +18,16 @@ var player = require('play-sound')(opts = {
 // })
 
 // access the node child_process in case you need to kill it on demand
-var audio = player.play('./../_temp-kids-radio-files/6 - Benjamin Bluemchen und die Schule INFO.mp3', function(err){
-  if (err && !err.killed) throw err
-});
-// audio.kill();
-// play.sound('./../_temp-kids-radio-files/6 - Benjamin Bluemchen und die Schule INFO.mp3');
+function main() {
+  console.log('Play...: "Benjamin Blümchen./"');
+  const audio = player.play('./sample.mp3', function(err){
+    if (err && !err.killed) throw err
+  });
+  setTimeout(() => {
+    audio.kill();
+    }
+  , 2000);
+  // play.sound('./../_temp-kids-radio-files/6 - Benjamin Bluemchen und die Schule INFO.mp3');
+}
+
+setInterval(main, 3000);
