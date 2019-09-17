@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "docker:build": "docker build -t thomasfrei/kids-radio-service .",
+    "docker:run": "docker run --rm -d thomasfrei/kids-radio-service",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Thomas Frei",
