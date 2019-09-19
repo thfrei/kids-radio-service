@@ -19,6 +19,8 @@ RUN install_packages \
 WORKDIR /usr/src/app
 COPY package*.json ./
 
+# Set python version to 2.7. node-gyp only works with python 2.7
+CMD ["npm", "config set python python2.7"]
 # This install npm dependencies on the balena build server,
 # making sure to clean up the artifacts it creates in order to reduce the image size.
 RUN JOBS=MAX npm install --production --unsafe-perm && npm cache verify && rm -rf /tmp/*
