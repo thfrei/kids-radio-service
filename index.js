@@ -1,4 +1,8 @@
 const express = require('express');
+const pipins = require('pi-pins');
+
+const button_white = pipins.connect(17);
+button_white.mode('in');
 
 // Constants
 const PORT = 80;
@@ -47,3 +51,8 @@ function main() {
 
 // setInterval(main, 3000);
 main();
+
+button_white.on('fall', function () {       // rise, fall, both
+  console.log("RING A DING A LING");
+  main();
+});
