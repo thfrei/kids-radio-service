@@ -48,7 +48,7 @@ function main() {
   setTimeout(() => {
     audio.kill();
 
-      const omxplayer = omx('./sample.mp3');
+      const omxplayer = omx('./sample.mp3', 'both', false, 80);
 
     }
   , 2000);
