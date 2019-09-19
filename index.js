@@ -1,6 +1,12 @@
 const express = require('express');
 const pipins = require('pi-pins');
 
+const player = require('play-sound')(opts = {
+  player: 'mpg123',
+});
+
+const omx = require('node-omxplayer');
+
 const button_white = pipins.connect(17);
 button_white.mode('in');
 
@@ -17,9 +23,6 @@ app.get('/', (req, res) => {
 app.listen(PORT, HOST);
 console.log(`Running on http://${HOST}:${PORT}`);
 
-const player = require('play-sound')(opts = {
-  player: 'mpg123',
-});
 //
 // // $ mplayer foo.mp3
 // player.play('foo.mp3', function(err){
@@ -44,9 +47,13 @@ function main() {
   });
   setTimeout(() => {
     audio.kill();
+
+      const omxplayer = omx('./sample.mp3');
+
     }
   , 2000);
   // play.sound('./../_temp-kids-radio-files/6 - Benjamin Bluemchen und die Schule INFO.mp3');
+
 }
 
 // setInterval(main, 3000);
