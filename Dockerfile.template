@@ -1,7 +1,8 @@
 # base-image for node on any machine using a template variable,
 # see more about dockerfile templates here: https://www.balena.io/docs/learn/develop/dockerfile/#dockerfile-templates
 # and about balena base images here: https://www.balena.io/docs/reference/base-images/base-images/
-FROM balenalib/%%BALENA_MACHINE_NAME%%-node:8-stretch-build
+# beware, node-gyp only works with node 8 (not 10)
+FROM balenalib/%%BALENA_MACHINE_NAME%%-node:8-stretch-run
 
 ENV DBUS_SYSTEM_BUS_ADDRESS=unix:path=/host/run/dbus/system_bus_socket
 
@@ -14,9 +15,7 @@ RUN install_packages \
   alsa-utils \
   python-dbus \
   mplayer \
-  mpg123 \
-  python2.7 \
-  python-pip
+  mpg123
 
 WORKDIR /usr/src/app
 COPY package*.json ./
