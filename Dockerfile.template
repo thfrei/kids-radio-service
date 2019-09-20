@@ -16,7 +16,8 @@ RUN install_packages \
   python-dbus \
   mplayer \
   mpg123 \
-  omxplayer
+  omxplayer \
+  wiringpi
 
 WORKDIR /usr/src/app
 COPY package*.json ./
