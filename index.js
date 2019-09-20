@@ -7,8 +7,14 @@ const player = require('play-sound')(opts = {
 
 const omx = require('node-omxplayer');
 
-const button_white = pipins.connect(17);
-button_white.mode('in');
+const button_prev = pipins.connect(17);
+button_prev.mode('in');
+const button_stop = pipins.connect(27);
+button_stop.mode('in');
+const button_play = pipins.connect(22);
+button_play.mode('in');
+const button_next = pipins.connect(26);
+button_next.mode('in');
 
 // Constants
 const PORT = 80;
@@ -20,46 +26,40 @@ app.get('/', (req, res) => {
   res.send('Hello world\n');
 });
 
+app.get('/1', (req, res) => {
+  player.play('./assets/1.mp3');
+  res.send('1');
+});
+app.get('/2', (req, res) => {
+  player.play('./assets/2.mp3');
+  res.send('2');
+});
+app.get('/3', (req, res) => {
+  player.play('./assets/3.mp3');
+  res.send('3');
+});
+app.get('/4', (req, res) => {
+  player.play('./assets/4.mp3');
+  res.send('4');
+});
+
 app.listen(PORT, HOST);
+player.play('./assets/radio_bereit.mp3');
 console.log(`Running on http://${HOST}:${PORT}`);
 
-//
-// // $ mplayer foo.mp3
-// player.play('foo.mp3', function(err){
-//   if (err) throw err
-// })
-//
-// // { timeout: 300 } will be passed to child process
-// player.play('foo.mp3', { timeout: 300 }, function(err){
-//   if (err) throw err
-// })
-//
-// // configure arguments for executable if any
-// player.play('foo.mp3', { afplay: ['-v', 1 ] /* lower volume for afplay on OSX */ }, function(err){
-//   if (err) throw err
-// })
-
-// access the node child_process in case you need to kill it on demand
-function main() {
-  console.log('Play...: "Benjamin Blümchen./"');
-  const audio = player.play('./sample.mp3', function(err){
-    if (err && !err.killed) throw err
-  });
-  setTimeout(() => {
-    audio.kill();
-
-      const omxplayer = omx('./sample.mp3', 'both', false, 80);
-
-    }
-  , 2000);
-  // play.sound('./../_temp-kids-radio-files/6 - Benjamin Bluemchen und die Schule INFO.mp3');
-
-}
-
-// setInterval(main, 3000);
-main();
-
-button_white.on('fall', function () {       // rise, fall, both
-  console.log("RING A DING A LING");
-  main();
+button_prev.on('fall', function () {       // rise, fall, both
+  console.log("prev-1");
+  player.play('./assets/1.mp3');
+});
+button_stop.on('fall', function () {       // rise, fall, both
+  console.log("stop-2");
+  player.play('./assets/2.mp3');
+});
+button_stop.on('fall', function () {       // rise, fall, both
+  console.log("play-3");
+  player.play('./assets/3.mp3');
+});
+button_stop.on('fall', function () {       // rise, fall, both
+  console.log("next-4");
+  player.play('./assets/4.mp3');
 });
