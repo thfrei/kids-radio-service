@@ -39,6 +39,7 @@ try {
   function printValues() {
     console.log('1', button_prev.value(), '2', button_stop.value(), '3', button_play.value(), '4', button_next.value());
   }
+  setInterval(printValues, 2000);
 } catch (err) {
   console.log('pipins error, probably running NOT on rpi hardware', err);
 }
