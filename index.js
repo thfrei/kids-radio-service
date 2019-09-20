@@ -17,21 +17,28 @@ try {
 
   button_prev.on('fall', function () {       // rise, fall, both
     console.log("prev-1");
+    printValues();
     player.play('./assets/1.mp3',() =>{});
   });
   button_stop.on('fall', function () {       // rise, fall, both
     console.log("stop-2");
+    printValues();
     player.play('./assets/2.mp3',() =>{});
   });
   button_play.on('fall', function () {       // rise, fall, both
     console.log("play-3");
+    printValues();
     player.play('./assets/3.mp3',() =>{});
   });
   button_next.on('fall', function () {       // rise, fall, both
     console.log("next-4");
+    printValues();
     player.play('./assets/4.mp3',() =>{});
   });
 
+  function printValues() {
+    console.log('1', button_prev.value(), '2', button_stop.value(), '3', button_play.value(), '4', button_next.value());
+  }
 } catch (err) {
   console.log('pipins error, probably running NOT on rpi hardware', err);
 }
