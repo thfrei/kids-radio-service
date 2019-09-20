@@ -23,11 +23,11 @@ try {
     console.log("stop-2");
     player.play('./assets/2.mp3',() =>{});
   });
-  button_stop.on('fall', function () {       // rise, fall, both
+  button_play.on('fall', function () {       // rise, fall, both
     console.log("play-3");
     player.play('./assets/3.mp3',() =>{});
   });
-  button_stop.on('fall', function () {       // rise, fall, both
+  button_next.on('fall', function () {       // rise, fall, both
     console.log("next-4");
     player.play('./assets/4.mp3',() =>{});
   });
