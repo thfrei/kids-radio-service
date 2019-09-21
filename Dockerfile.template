@@ -15,7 +15,8 @@ RUN install_packages \
   alsa-utils \
   python-dbus \
   mplayer \
-  mpg123
+  mpg123 \
+  wiringpi
 
 WORKDIR /usr/src/app
 COPY package*.json ./

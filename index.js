@@ -3,7 +3,7 @@ const player = require('play-sound')(opts = {
   player: 'mpg123',
 });
 try {
-  const wpi = require('wiring-pi');
+  const wpi = require('node-wiring-pi');
   wpi.setup('gpio');
 
   function listenPin(nr, cb) {

@@ -17,7 +17,7 @@
     "env-cmd": "10.0.1",
     "express": "4.17.1",
     "node-omxplayer": "0.6.1",
-    "play-sound": "1.1.3",
-    "wiring-pi": "2.2.1"
+    "node-wiring-pi": "0.0.5",
+    "play-sound": "1.1.3"
   }
 }
