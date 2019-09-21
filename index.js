@@ -9,14 +9,21 @@ try {
   function listenPin(nr, cb) {
     wpi.pinMode(nr, wpi.INPUT);
     wpi.pullUpDnControl(nr, wpi.PUD_DOWN);
+    let edges = {rising: false, falling: false};
     wpi.wiringPiISR(nr, wpi.INT_EDGE_RISING, function(delta) {
-      console.log("action on pin", nr, 'delta', delta);
+      console.log("rising action on pin", nr, 'delta', delta);
       // only executes if delta >10k
-      if (delta > 10*1000) {
-        console.log("calling cb");
-        cb(delta);
-      }
+      edges.rising = true;
     });
+    wpi.wiringPiISR(nr, wpi.INT_EDGE_FALLING, function(delta) {
+      console.log("falling action on pin", nr, 'delta', delta);
+      // only executes if delta >10k
+      edges.falling = true;
+    });
+
+    if (edges.rising && edges.falling) {
+      cb();
+    }
   }
 
   listenPin(27, (delta) => {
