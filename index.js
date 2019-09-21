@@ -10,26 +10,14 @@ try {
     wpi.pinMode(nr, wpi.INPUT);
     wpi.pullUpDnControl(nr, wpi.PUD_DOWN);
     let edges = {rising: false, falling: false};
-    wpi.wiringPiISR(nr, wpi.INT_EDGE_RISING, function(delta) {
-      console.log("rising action on pin", nr, 'delta', delta);
+    wpi.wiringPiISR(nr, wpi.INT_EDGE_BOTH, function(delta) {
+      console.log("both action on pin", nr, 'delta', delta);
       // only executes if delta >10k
       edges.rising = true;
 
       if (edges.rising && edges.falling) {
         cb();
         console.log('exe 1');
-        edges.falling = false;
-        edges.rising = false;
-      }
-    });
-    wpi.wiringPiISR(nr, wpi.INT_EDGE_FALLING, function(delta) {
-      console.log("falling action on pin", nr, 'delta', delta);
-      // only executes if delta >10k
-      edges.falling = true;
-
-      if (edges.rising && edges.falling) {
-        cb();
-        console.log('exe 2');
         edges.falling = false;
         edges.rising = false;
       }
