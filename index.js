@@ -2,6 +2,7 @@ const express = require('express');
 const player = require('play-sound')(opts = {
   player: 'mpg123',
 });
+const _ = require('lodash');
 try {
   const wpi = require('node-wiring-pi');
   wpi.setup('gpio');
@@ -10,30 +11,32 @@ try {
     wpi.pinMode(nr, wpi.INPUT);
     wpi.pullUpDnControl(nr, wpi.PUD_UP);
     let edges = {rising: false, falling: false};
-    wpi.wiringPiISR(nr, wpi.INT_EDGE_BOTH, function(delta) {
-      console.log("both action on pin", nr, 'delta', delta);
-      // only executes if delta >10k
-      edges.rising = true;
 
-      if (edges.rising && edges.falling) {
-        cb();
+    const debouncedCB = _.debounce(cb, 600);
+    wpi.wiringPiISR(nr, wpi.INT_EDGE_RISING, function(delta) {
+      console.log("both action on pin", nr, 'delta', delta);
+      // only executes if delta >1k // <1k some spikes in electronics?
+      if (delta > 1000) {
+        debouncedCB(delta);
         console.log('exe 1');
-        edges.falling = false;
-        edges.rising = false;
       }
     });
   }
 
   listenPin(27, (delta) => {
+    console.log('play asset');
     player.play('./assets/1.mp3',() =>{});
   });
   listenPin(22, () => {
+    console.log('play asset');
     player.play('./assets/2.mp3',() =>{});
   });
   listenPin(17, () => {
+    console.log('play asset');
     player.play('./assets/3.mp3',() =>{});
   });
   listenPin(26, () => {
+    console.log('play asset');
     player.play('./assets/4.mp3',() =>{});
   });
 
