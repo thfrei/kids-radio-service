@@ -12,6 +12,7 @@ ENV PORT=80
 
 # use `install_packages` if you need to install dependencies,
 RUN install_packages \
+  alsa-base \
   alsa-utils \
   python-dbus \
   mplayer \
