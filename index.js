@@ -10,15 +10,18 @@ try {
   function listenPin(nr, cb) {
     wpi.pinMode(nr, wpi.INPUT);
     wpi.pullUpDnControl(nr, wpi.PUD_UP);
-    let edges = {rising: false, falling: false};
 
-    const debouncedCB = _.debounce(cb, 600);
+    // execute cb on leading edge, do not execute in the next x ms even if called
+    const debouncedCB = _.debounce(cb, 600, {
+      'leading': true,
+      'trailing': false
+    });
     wpi.wiringPiISR(nr, wpi.INT_EDGE_RISING, function(delta) {
-      console.log("both action on pin", nr, 'delta', delta);
+      console.log("rising action on pin", nr, 'delta', delta);
       // only executes if delta >1k // <1k some spikes in electronics?
       if (delta > 1000) {
+        console.log('call debounced cb');
         debouncedCB(delta);
-        console.log('exe 1');
       }
     });
   }
