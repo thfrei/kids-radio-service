@@ -2,46 +2,34 @@ const express = require('express');
 const player = require('play-sound')(opts = {
   player: 'mpg123',
 });
-
 try {
-  pipins = require('pi-pins');
+  const wpi = require('wiring-pi');
+  wpi.setup('gpio');
 
-  const button_prev = pipins.connect(17);
-  button_prev.mode('in');
-  const button_stop = pipins.connect(27);
-  button_stop.mode('in');
-  const button_play = pipins.connect(22);
-  button_play.mode('in');
-  const button_next = pipins.connect(26);
-  button_next.mode('in');
+  function listenPin(nr, cb) {
+    wpi.pinMode(nr, wpi.INPUT);
+    wpi.pullUpDnControl(nr, wpi.PUD_UP);
+    wpi.wiringPiISR(nr, wpi.INT_EDGE_FALLING, function(delta) {
+      console.log("action on pin", nr);
+      cb();
+    });
+  }
 
-  button_prev.on('fall', function () {       // rise, fall, both
-    console.log("prev-1");
-    printValues();
+  listenPin(17, (delta) => {
     player.play('./assets/1.mp3',() =>{});
   });
-  button_stop.on('fall', function () {       // rise, fall, both
-    console.log("stop-2");
-    printValues();
+  listenPin(27, () => {
     player.play('./assets/2.mp3',() =>{});
   });
-  button_play.on('fall', function () {       // rise, fall, both
-    console.log("play-3");
-    printValues();
+  listenPin(22, () => {
     player.play('./assets/3.mp3',() =>{});
   });
-  button_next.on('fall', function () {       // rise, fall, both
-    console.log("next-4");
-    printValues();
+  listenPin(26, () => {
     player.play('./assets/4.mp3',() =>{});
   });
 
-  function printValues() {
-    console.log('1', button_prev.value(), '2', button_stop.value(), '3', button_play.value(), '4', button_next.value());
-  }
-  setInterval(printValues, 2000);
 } catch (err) {
-  console.log('pipins error, probably running NOT on rpi hardware', err);
+  console.log('wiring pi error, probably running NOT on rpi hardware', err);
 }
 
 // Constants
