@@ -73,9 +73,15 @@ app.get('/4', (req, res) => {
   player.play('./assets/4.mp3',() =>{});
   res.send('4');
 });
+let urlPlayer;
 app.get('/url/:url', (req, res) => {
   const url = req.params.url;
-  player.play(url);
+  urlPlayer = player.play(url);
+  res.send(`playing ${url}`);
+});
+app.get('/stop', (req, res) => {
+  urlPlayer.kill();
+  res.send(`stopped`);
 });
 
 app.listen(PORT, HOST);
