@@ -8,7 +8,7 @@ try {
 
   function listenPin(nr, cb) {
     wpi.pinMode(nr, wpi.INPUT);
-    wpi.pullUpDnControl(nr, wpi.PUD_UP);
+    wpi.pullUpDnControl(nr, wpi.PUD_DOWN);
     wpi.wiringPiISR(nr, wpi.INT_EDGE_FALLING, function(delta) {
       console.log("action on pin", nr, 'delta', delta);
       cb(delta);
