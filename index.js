@@ -73,6 +73,10 @@ app.get('/4', (req, res) => {
   player.play('./assets/4.mp3',() =>{});
   res.send('4');
 });
+app.get('/url/:url', (req, res) => {
+  const url = req.params.url;
+  player.play(url);
+});
 
 app.listen(PORT, HOST);
 player.play('./assets/radio_bereit.mp3',() =>{});
