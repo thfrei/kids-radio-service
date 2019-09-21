@@ -11,17 +11,21 @@ try {
     wpi.pullUpDnControl(nr, wpi.PUD_DOWN);
     wpi.wiringPiISR(nr, wpi.INT_EDGE_RISING, function(delta) {
       console.log("action on pin", nr, 'delta', delta);
-      cb(delta);
+      // only executes if delta >10k
+      if (delta > 10*1000) {
+        console.log("calling cb");
+        cb(delta);
+      }
     });
   }
 
-  listenPin(17, (delta) => {
+  listenPin(27, (delta) => {
     player.play('./assets/1.mp3',() =>{});
   });
-  listenPin(27, () => {
+  listenPin(22, () => {
     player.play('./assets/2.mp3',() =>{});
   });
-  listenPin(22, () => {
+  listenPin(17, () => {
     player.play('./assets/3.mp3',() =>{});
   });
   listenPin(26, () => {
