@@ -78,7 +78,7 @@ const HOST = '0.0.0.0';
 
 const app = express();
 app.set('view engine', 'pug');
-app.set('views', './views')
+app.set('views', './views');
 app.get('/', (req, res) => {
   res.render('index.pug', {title: 'Kids-Radio'});
 });

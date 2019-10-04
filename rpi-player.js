@@ -5,7 +5,7 @@ const player = require('play-sound')(opts = {
 
 class RpiPlayer {
   constructor() {
-    this.audio;
+    this.audio = undefined;
     this.files = [];
     this.currentSong = 0;
   }
