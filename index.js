@@ -71,13 +71,13 @@ try {
 
     previous() {
       console.log('RPIPlayer previous', STATE);
-      STATE.currentSong = STATE.currentSong === 0 ? 0 : STATE.currentSong--;
+      STATE.currentSong--;
       console.log('RPIPlayer previous', STATE);
     }
 
     next() {
       console.log('RPIPlayer next', STATE);
-      STATE.currentSong = STATE.currentSong === STATE.files.length - 1 ? STATE.files.length - 1 : STATE.currentSong++;
+      STATE.currentSong++;
       console.log('RPIPlayer next', STATE);
     }
   }
