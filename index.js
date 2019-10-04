@@ -1,57 +1,24 @@
 const express = require('express');
-const player = require('play-sound')(opts = {
-  player: 'mpg123',
-});
 const _ = require('lodash');
+const RPIPlayer = require('./rpi-player').RPIPlayer;
 
-const STATE = {
-  currentSong: 0,
-  files: [
-    './assets/1.mp3',
-    './assets/2.mp3',
-    './assets/3.mp3',
-    './assets/4.mp3',
-    './assets/free_sample.mp3',
-    './assets/radio_bereit.mp3',
-    './assets/voice.mp3',
-  ]
-};
+const KIDS_RADIO_SERVER_JSON_URL = process.env.KIDS_RADIO_SERVER_JSON_URL;
+const DATA_STORAGE_PATH = process.env.DATA_STORAGE_PATH || '/data/songs';
 
-class RPIPlayer {
-  constructor() {
-    this.audio;
-  }
-
-  play() {
-    console.log('RPIPlayer play', STATE);
-    this.audio = player.play(STATE.files[STATE.currentSong], err => console.error);
-  }
-
-  playFile(file) {
-    console.log('RPIPlayer playFile', file, STATE);
-    this.audio = player.play(file, err => console.error)
-  }
-
-  stop() {
-    console.log('RPIPlayer stop', STATE);
-    if (!_.isNil(this.audio)) {
-      this.audio.kill();
-    }
-  }
-
-  previous() {
-    console.log('RPIPlayer previous', STATE);
-    STATE.currentSong--;
-    console.log('RPIPlayer previous', STATE);
-  }
-
-  next() {
-    console.log('RPIPlayer next', STATE);
-    STATE.currentSong++;
-    console.log('RPIPlayer next', STATE);
-  }
+if (_.isNil(KIDS_RADIO_SERVER_JSON_URL)) {
+  console.log(`Your kids radio server is not set. Please set env var: KIDS_RADIO_SERVER_JSON_URL`);
 }
-const RPIAudio = new RPIPlayer();
+
+const files = [
+  './assets/1.mp3',
+  './assets/2.mp3',
+  './assets/3.mp3',
+  './assets/4.mp3',
+  './assets/free_sample.mp3',
+  './assets/radio_bereit.mp3',
+  './assets/voice.mp3',
+];
+RPIPlayer.setFiles(files);
 
 // GPIOs (Buttons)
 try {
@@ -89,16 +56,16 @@ try {
   }
 
   listenPin(27, (delta) => {
-    RPIAudio.previous();
+    RPIPlayer.previous();
   });
   listenPin(22, () => {
-    RPIAudio.stop();
+    RPIPlayer.stop();
   });
   listenPin(17, () => {
-    RPIAudio.play();
+    RPIPlayer.play();
   });
   listenPin(26, () => {
-    RPIAudio.next();
+    RPIPlayer.next();
   });
 
 } catch (err) {
@@ -117,31 +84,31 @@ app.get('/', (req, res) => {
 });
 
 app.get('/1', (req, res) => {
-  RPIAudio.previous();
-  res.send(STATE.files[STATE.currentSong]);
+  RPIPlayer.previous();
+  res.send(RPIPlayer.getCurrentFile());
 });
 app.get('/2', (req, res) => {
-  RPIAudio.stop();
+  RPIPlayer.stop();
   res.send('STOP');
 });
 app.get('/stop', (req, res) => {
-  RPIAudio.stop();
+  RPIPlayer.stop();
   res.send(`stopped`);
 });
 app.get('/3', (req, res) => {
-  RPIAudio.play();
+  RPIPlayer.play();
   res.send('PLAY');
 });
 app.get('/4', (req, res) => {
-  RPIAudio.next();
-  res.send(STATE.files[STATE.currentSong]);
+  RPIPlayer.next();
+  res.send(RPIPlayer.getCurrentFile());
 });
 app.get('/url/:url', (req, res) => {
   const url = req.params.url;
-  RPIAudio.play(url);
+  RPIPlayer.play(url);
   res.send(`playing ${url}`);
 });
 
 app.listen(PORT, HOST);
-RPIAudio.playFile('./assets/radio_bereit.mp3');
+RPIPlayer.playFile('./assets/radio_bereit.mp3');
 console.log(`Running on http://${HOST}:${PORT}`);
