@@ -3,10 +3,15 @@ const _ = require('lodash');
 const RPIPlayer = require('./rpi-player').RPIPlayer;
 
 const KIDS_RADIO_SERVER_JSON_URL = process.env.KIDS_RADIO_SERVER_JSON_URL;
-const DATA_STORAGE_PATH = process.env.DATA_STORAGE_PATH || '/data/songs';
 
 if (_.isNil(KIDS_RADIO_SERVER_JSON_URL)) {
   console.log(`Your kids radio server is not set. Please set env var: KIDS_RADIO_SERVER_JSON_URL`);
+} else {
+  RPIPlayer.downloadFile('list.json', KIDS_RADIO_SERVER_JSON_URL)
+    .then(() => {
+      console.log('done');
+    })
+    .catch(console.error);
 }
 
 const files = [
@@ -69,7 +74,7 @@ try {
   });
 
 } catch (err) {
-  console.log('wiring pi error, probably running NOT on rpi hardware', err);
+  console.log('wiring pi error, probably running NOT on rpi hardware');
 }
 
 // Web Server
