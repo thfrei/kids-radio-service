@@ -17,6 +17,42 @@ const STATE = {
   ]
 };
 
+class RPIPlayer {
+  constructor() {
+    this.audio;
+  }
+
+  play() {
+    console.log('RPIPlayer play', STATE);
+    this.audio = player.play(STATE.files[STATE.currentSong], err => console.error);
+  }
+
+  playFile(file) {
+    console.log('RPIPlayer playFile', file, STATE);
+    this.audio = player.play(file, err => console.error)
+  }
+
+  stop() {
+    console.log('RPIPlayer stop', STATE);
+    if (!_.isNil(this.audio)) {
+      this.audio.kill();
+    }
+  }
+
+  previous() {
+    console.log('RPIPlayer previous', STATE);
+    STATE.currentSong--;
+    console.log('RPIPlayer previous', STATE);
+  }
+
+  next() {
+    console.log('RPIPlayer next', STATE);
+    STATE.currentSong++;
+    console.log('RPIPlayer next', STATE);
+  }
+}
+const RPIAudio = new RPIPlayer();
+
 // GPIOs (Buttons)
 try {
   const wpi = require('node-wiring-pi');
@@ -52,38 +88,6 @@ try {
     });
   }
 
-  class RPIPlayer {
-    constructor() {
-      this.audio;
-    }
-
-    play() {
-      console.log('RPIPlayer play', STATE);
-      this.audio = player.play(STATE.files[STATE.currentSong], err => console.error);
-    }
-
-    stop() {
-      console.log('RPIPlayer stop', STATE);
-      if (!_.isNil(this.audio)) {
-        this.audio.kill();
-      }
-    }
-
-    previous() {
-      console.log('RPIPlayer previous', STATE);
-      STATE.currentSong--;
-      console.log('RPIPlayer previous', STATE);
-    }
-
-    next() {
-      console.log('RPIPlayer next', STATE);
-      STATE.currentSong++;
-      console.log('RPIPlayer next', STATE);
-    }
-  }
-  const RPIAudio = new RPIPlayer();
-
-
   listenPin(27, (delta) => {
     RPIAudio.previous();
   });
@@ -106,37 +110,38 @@ const PORT = 80;
 const HOST = '0.0.0.0';
 
 const app = express();
+app.set('view engine', 'pug');
+app.set('views', './views')
 app.get('/', (req, res) => {
-  res.send('Hello world\n');
+  res.render('index.pug', {title: 'Kids-Radio'});
 });
 
 app.get('/1', (req, res) => {
-  player.play('./assets/1.mp3',() =>{});
-  res.send('1');
+  RPIAudio.previous();
+  res.send(STATE.files[STATE.currentSong]);
 });
 app.get('/2', (req, res) => {
-  player.play('./assets/2.mp3',() =>{});
-  res.send('2');
-});
-app.get('/3', (req, res) => {
-  player.play('./assets/3.mp3',() =>{});
-  res.send('3');
-});
-app.get('/4', (req, res) => {
-  player.play('./assets/4.mp3',() =>{});
-  res.send('4');
-});
-let urlPlayer;
-app.get('/url/:url', (req, res) => {
-  const url = req.params.url;
-  urlPlayer = player.play(url);
-  res.send(`playing ${url}`);
+  RPIAudio.stop();
+  res.send('STOP');
 });
 app.get('/stop', (req, res) => {
-  urlPlayer.kill();
+  RPIAudio.stop();
   res.send(`stopped`);
+});
+app.get('/3', (req, res) => {
+  RPIAudio.play();
+  res.send('PLAY');
+});
+app.get('/4', (req, res) => {
+  RPIAudio.next();
+  res.send(STATE.files[STATE.currentSong]);
+});
+app.get('/url/:url', (req, res) => {
+  const url = req.params.url;
+  RPIAudio.play(url);
+  res.send(`playing ${url}`);
 });
 
 app.listen(PORT, HOST);
-player.play('./assets/radio_bereit.mp3',() =>{});
+RPIAudio.playFile('./assets/radio_bereit.mp3');
 console.log(`Running on http://${HOST}:${PORT}`);

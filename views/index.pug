@@ -1,0 +1,24 @@
+html
+    head
+        title= title
+    body
+        h1= title
+        Button(onClick='ajax("/1")') Previous
+        Button(onClick='ajax("/2")') Stop
+        Button(onClick='ajax("/3")') Play
+        Button(onClick='ajax("/4")') Next
+
+        div#status Status...
+
+        script(type='text/javascript').
+          function ajax(url) {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+              if (this.readyState == 4 && this.status == 200) {
+                document.getElementById("status").innerHTML = this.responseText;
+                console.log('ajax, response', this.responseText);
+              }
+            };
+            xhttp.open("GET", url + "?t=" + Math.random(), true);
+            xhttp.send();
+          }
