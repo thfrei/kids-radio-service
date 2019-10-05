@@ -116,6 +116,7 @@ class RpiPlayer {
   }
 
   play() {
+    this.stop();
     console.log('RPIPlayer play');
     this.audioHandles.push(player.play(this.createFilePath(this.files[this.currentSong].song.file), err => console.error));
   }
@@ -142,7 +143,7 @@ class RpiPlayer {
   previous() {
     this.currentSong--;
     if (this.currentSong<0) {
-      this.currentSong=0;
+      this.currentSong=this.files.length-1;
     }
     this.playInfo();
     console.log('RPIPlayer previous', this.getCurrentFileObject());
@@ -151,7 +152,7 @@ class RpiPlayer {
   next() {
     this.currentSong++;
     if (this.currentSong >= this.files.length-1) {
-      this.currentSong = this.files.length-1;
+      this.currentSong = 0;
     }
     this.playInfo();
     console.log('RPIPlayer next', this.getCurrentFileObject());
