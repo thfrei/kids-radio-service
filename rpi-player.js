@@ -122,6 +122,7 @@ class RpiPlayer {
   }
 
   playInfo() {
+    this.stop();
     console.log('RPIPlayer play info');
     this.audioHandles.push(player.play(this.createFilePath(this.files[this.currentSong].info.file), err => console.error));
   }
@@ -151,7 +152,7 @@ class RpiPlayer {
 
   next() {
     this.currentSong++;
-    if (this.currentSong >= this.files.length-1) {
+    if (this.currentSong > this.files.length-1) {
       this.currentSong = 0;
     }
     this.playInfo();
