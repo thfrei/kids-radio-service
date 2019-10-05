@@ -2,6 +2,8 @@ const _ = require('lodash');
 const request = require('request');
 const path = require('path');
 const fs = require('fs');
+const sha256File = require('sha256-file');
+const ProgressBar = require('./progress-bar');
 const player = require('play-sound')(opts = {
   player: 'mpg123',
 });
@@ -13,32 +15,35 @@ if (_.isNil(process.env.DATA_STORAGE_PATH)) {
 
 class RpiPlayer {
   constructor() {
-    this.audio = undefined;
+    this.audioHandles = [];
     this.files = [];
     this.currentSong = 0;
+    this.serverUrl = '';
+
+    this.listFileName = 'list.json';
+  }
+
+  setUrl(url) {
+    this.serverUrl = url;
   }
 
   setFiles(files) {
     this.files = files;
   }
 
-  async downloadFile(fileNameToSave, url) {
+  async downloadFile(filePath, url) {
     /* source: https://learnscraping.com/how-to-download-files-with-nodejs-using-request/ */
     /* Create an empty file where we can save data */
-    let file = fs.createWriteStream(path.join(DATA_STORAGE_PATH, fileNameToSave));
+    let file = fs.createWriteStream(filePath);
     /* Using Promises so that we can use the ASYNC AWAIT syntax */
     await new Promise((resolve, reject) => {
       let stream = request({
         /* Here you should specify the exact link to the file you are trying to download */
         uri: url,
         headers: {
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-          'Accept-Encoding': 'gzip, deflate, br',
-          'Accept-Language': 'en-US,en;q=0.9,fr;q=0.8,ro;q=0.7,ru;q=0.6,la;q=0.5,pt;q=0.4,de;q=0.3',
           'Cache-Control': 'max-age=0',
           'Connection': 'keep-alive',
           'Upgrade-Insecure-Requests': '1',
-          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36'
         },
         /* GZIP true for most of the websites now, disable it if you don't need it */
         gzip: true
@@ -57,35 +62,103 @@ class RpiPlayer {
     });
   }
 
+  downloadList() {
+    return this.downloadFile(this.createFilePath(this.listFileName), `${this.serverUrl}${this.listFileName}`)
+      .then(() => {})
+      .catch(console.error);
+  }
+
+  async syncFilesWithList() {
+    try {
+      const listFilePath = this.createFilePath(this.listFileName);
+      const listFile = fs.existsSync(listFilePath);
+      if(listFile) {
+        const list = require(listFilePath);
+        for (let entry of list) {
+          console.log(`working on ${entry.song.file} =====================`);
+          await this.syncFileObject(entry.info);
+          await this.syncFileObject(entry.song);
+        }
+        this.setFiles(list);
+      }
+    } catch (err) {
+      console.error('sfwl', err);
+    }
+  }
+
+  async syncFileObject(fileObject) {
+    const songFilePath = this.createFilePath(fileObject.file);
+    const songUrl = `${this.serverUrl}${fileObject.file}`;
+    const songListSha = _.toString(fileObject.sha256).toUpperCase();
+
+    if(fs.existsSync(songFilePath)) {
+      // check if file exists
+      const songSha = _.toString(sha256File(songFilePath)).toUpperCase();
+      console.log('comparing sha', songFilePath, songSha, songListSha);
+      if (songSha === songListSha) {
+        // do nothing
+        console.log('exact match of file exists locally already', songFilePath, songSha, songListSha);
+      } else {
+        // delete old file
+        fs.unlinkSync(songFilePath);
+        console.log('delete old file', songFilePath);
+        console.log('downloading', songUrl, songFilePath);
+        await this.downloadFile(songFilePath, songUrl);
+      }
+    } else {
+      console.log('downloading', songFilePath);
+      await this.downloadFile(songFilePath, songUrl);
+    }
+  }
+
+  createFilePath(fileName) {
+    return path.join(DATA_STORAGE_PATH, fileName);
+  }
+
   play() {
     console.log('RPIPlayer play');
-    this.audio = player.play(this.files[this.currentSong], err => console.error);
+    this.audioHandles.push(player.play(this.createFilePath(this.files[this.currentSong].song.file), err => console.error));
+  }
+
+  playInfo() {
+    console.log('RPIPlayer play info');
+    this.audioHandles.push(player.play(this.createFilePath(this.files[this.currentSong].info.file), err => console.error));
   }
 
   playFile(file) {
     console.log('RPIPlayer playFile', file);
-    this.audio = player.play(file, err => console.error)
+    this.audioHandles.push(player.play(file, err => console.error));
   }
 
   stop() {
     console.log('RPIPlayer stop');
-    if (!_.isNil(this.audio)) {
-      this.audio.kill();
+    for(let handle of this.audioHandles) {
+      if (!_.isNil(handle)) {
+        handle.kill();
+      }
     }
   }
 
   previous() {
     this.currentSong--;
-    console.log('RPIPlayer previous', this.getCurrentFile());
+    if (this.currentSong<0) {
+      this.currentSong=0;
+    }
+    this.playInfo();
+    console.log('RPIPlayer previous', this.getCurrentFileObject());
   }
 
   next() {
     this.currentSong++;
-    console.log('RPIPlayer next', this.getCurrentFile());
+    if (this.currentSong >= this.files.length-1) {
+      this.currentSong = this.files.length-1;
+    }
+    this.playInfo();
+    console.log('RPIPlayer next', this.getCurrentFileObject());
   }
 
-  getCurrentFile() {
-    return this.files[this.currentSong];
+  getCurrentFileObject() {
+    return this.files[this.currentSong].song.file;
   }
 }
 

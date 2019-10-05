@@ -16,11 +16,11 @@
    if (err) throw err
  })
 
-const audio = player.play('./sample.mp3', function(err){
+const audioHandles = player.play('./sample.mp3', function(err){
     if (err && !err.killed) throw err
     
     setTimeout(() => {
-        audio.kill();
+        audioHandles.kill();
     }
     , 2000);
 }

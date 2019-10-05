@@ -2,28 +2,22 @@ const express = require('express');
 const _ = require('lodash');
 const RPIPlayer = require('./rpi-player').RPIPlayer;
 
-const KIDS_RADIO_SERVER_JSON_URL = process.env.KIDS_RADIO_SERVER_JSON_URL;
+const KIDS_RADIO_SERVER_URL = process.env.KIDS_RADIO_SERVER_URL;
 
-if (_.isNil(KIDS_RADIO_SERVER_JSON_URL)) {
+if (_.isNil(KIDS_RADIO_SERVER_URL)) {
   console.log(`Your kids radio server is not set. Please set env var: KIDS_RADIO_SERVER_JSON_URL`);
 } else {
-  RPIPlayer.downloadFile('list.json', KIDS_RADIO_SERVER_JSON_URL)
+  RPIPlayer.setUrl(KIDS_RADIO_SERVER_URL);
+  RPIPlayer.downloadList()
     .then(() => {
-      console.log('done');
+      RPIPlayer.syncFilesWithList()
+        .then(() => {
+          console.log('synced========');
+        })
+        .catch(console.error);
     })
     .catch(console.error);
 }
-
-const files = [
-  './assets/1.mp3',
-  './assets/2.mp3',
-  './assets/3.mp3',
-  './assets/4.mp3',
-  './assets/free_sample.mp3',
-  './assets/radio_bereit.mp3',
-  './assets/voice.mp3',
-];
-RPIPlayer.setFiles(files);
 
 // GPIOs (Buttons)
 try {
@@ -90,7 +84,7 @@ app.get('/', (req, res) => {
 
 app.get('/1', (req, res) => {
   RPIPlayer.previous();
-  res.send(RPIPlayer.getCurrentFile());
+  res.send(RPIPlayer.getCurrentFileObject());
 });
 app.get('/2', (req, res) => {
   RPIPlayer.stop();
@@ -106,7 +100,7 @@ app.get('/3', (req, res) => {
 });
 app.get('/4', (req, res) => {
   RPIPlayer.next();
-  res.send(RPIPlayer.getCurrentFile());
+  res.send(RPIPlayer.getCurrentFileObject());
 });
 app.get('/url/:url', (req, res) => {
   const url = req.params.url;
