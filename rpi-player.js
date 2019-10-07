@@ -3,7 +3,6 @@ const request = require('request');
 const path = require('path');
 const fs = require('fs');
 const sha256File = require('sha256-file');
-const ProgressBar = require('./progress-bar');
 const player = require('play-sound')(opts = {
   player: 'mpg123',
 });
@@ -49,6 +48,12 @@ class RpiPlayer {
         gzip: true
       })
         .pipe(file)
+        .on('response', (response) => {
+          console.log('resp');
+        })
+        .on('data', (data) => {
+          console.log('data');
+        })
         .on('finish', () => {
           console.log(`The file is finished downloading.`);
           resolve();
@@ -68,14 +73,24 @@ class RpiPlayer {
       .catch(console.error);
   }
 
+  loadList() {
+    const listFilePath = this.createFilePath(this.listFileName);
+    const listFile = fs.existsSync(listFilePath);
+    if(listFile) {
+      const list = require(listFilePath);
+      this.setFiles(list);
+    }
+  }
+
   async syncFilesWithList() {
     try {
       const listFilePath = this.createFilePath(this.listFileName);
       const listFile = fs.existsSync(listFilePath);
       if(listFile) {
         const list = require(listFilePath);
+        this.setFiles(list);
         for (let entry of list) {
-          console.log(`working on ${entry.song.file} =====================`);
+          console.log(`* === working on ${entry.song.file} =====================`);
           await this.syncFileObject(entry.info);
           await this.syncFileObject(entry.song);
         }
@@ -94,10 +109,10 @@ class RpiPlayer {
     if(fs.existsSync(songFilePath)) {
       // check if file exists
       const songSha = _.toString(sha256File(songFilePath)).toUpperCase();
-      console.log('comparing sha', songFilePath, songSha, songListSha);
+      console.log('comparing sha', songFilePath, "\n", songSha, "\n", songListSha);
       if (songSha === songListSha) {
         // do nothing
-        console.log('exact match of file exists locally already', songFilePath, songSha, songListSha);
+        console.log('exact match of file exists locally already, skip download');
       } else {
         // delete old file
         fs.unlinkSync(songFilePath);
