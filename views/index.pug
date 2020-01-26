@@ -5,22 +5,26 @@ head
     meta(name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no')
     // Bootstrap CSS
     link(rel='stylesheet' href='https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css' integrity='sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh' crossorigin='anonymous')
-    title Hello, world!
+
+    title Kids Radio
     style.
         button {
             margin: 5px;
         }
 
-body
+body(onload='ajax("/status")')
     div.jumbotron
         h1.display-4= title
+    div.alert.alert-info#status Status...
     div.text-center
         button.btn.btn-secondary(onClick='ajax("/1")') Previous
         button.btn.btn-danger(onClick='ajax("/2")') Stop
         button.btn.btn-success(onClick='ajax("/3")') Play
         button.btn.btn-secondary(onClick='ajax("/4")') Next
 
-    div.alert.alert-secondary#status Status...
+
+
+
 
     script(type='text/javascript').
       function ajax(url) {

@@ -82,6 +82,9 @@ app.get('/', (req, res) => {
   res.render('index.pug', {title: 'Kids-Radio'});
 });
 
+app.get('/status', (req, res) => {
+  res.send(RPIPlayer.getCurrentFileObject());
+});
 app.get('/1', (req, res) => {
   RPIPlayer.previous();
   res.send(RPIPlayer.getCurrentFileObject());
