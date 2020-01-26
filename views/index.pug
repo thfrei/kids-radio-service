@@ -12,14 +12,15 @@ head
         }
 
 body
-    h1.text-center= title
+    div.jumbotron
+        h1.display-4= title
     div.text-center
         button.btn.btn-secondary(onClick='ajax("/1")') Previous
         button.btn.btn-danger(onClick='ajax("/2")') Stop
         button.btn.btn-success(onClick='ajax("/3")') Play
         button.btn.btn-secondary(onClick='ajax("/4")') Next
 
-    div.text-center#status Status...
+    div.alert.alert-secondary#status Status...
 
     script(type='text/javascript').
       function ajax(url) {
