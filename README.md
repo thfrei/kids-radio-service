@@ -2,8 +2,12 @@ kids-radio-service
 ==================
 
  ![kids radio box](doc/kids-radio-box.png)
- Not pretty, but it works well:
+ 
+ Not pretty, but it works just fine:
  ![kids-radio inside](doc/kids-radio-inside.png)
+ 
+ Function
+ ----------
 
 First Prototype: Replays audioHandles once to test sound output from rpi3 
 when running inside docker container via balena
