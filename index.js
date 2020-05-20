@@ -4,6 +4,59 @@ const RPIPlayer = require('./rpi-player').RPIPlayer;
 
 const KIDS_RADIO_SERVER_URL = process.env.KIDS_RADIO_SERVER_URL;
 
+/**
+ * Start webserver
+ */
+try {
+  const PORT = 80;
+  const HOST = '0.0.0.0';
+
+  const app = express();
+  app.set('view engine', 'pug');
+  app.set('views', './views');
+  app.get('/', (req, res) => {
+    res.render('index.pug', {title: 'Kids-Radio'});
+  });
+
+  app.get('/status', (req, res) => {
+    res.send(RPIPlayer.getCurrentFileObject());
+  });
+  app.get('/1', (req, res) => {
+    RPIPlayer.previous();
+    res.send(RPIPlayer.getCurrentFileObject());
+  });
+  app.get('/2', (req, res) => {
+    RPIPlayer.stop();
+    res.send('STOP');
+  });
+  app.get('/stop', (req, res) => {
+    RPIPlayer.stop();
+    res.send(`stopped`);
+  });
+  app.get('/3', (req, res) => {
+    RPIPlayer.play();
+    res.send('PLAY');
+  });
+  app.get('/4', (req, res) => {
+    RPIPlayer.next();
+    res.send(RPIPlayer.getCurrentFileObject());
+  });
+  app.get('/url/:url', (req, res) => {
+    const url = req.params.url;
+    RPIPlayer.play(url);
+    res.send(`playing ${url}`);
+  });
+
+  app.listen(PORT, HOST);
+  RPIPlayer.playFile('./assets/radio_bereit.mp3');
+  console.log(`Running on http://${HOST}:${PORT}`);
+} catch (err) {
+  console.error('Problems starting express web server', err);
+}
+
+/**
+ * Sync songs
+ */
 if (_.isNil(KIDS_RADIO_SERVER_URL)) {
   console.log(`Your kids radio server is not set. Please set env var: KIDS_RADIO_SERVER_JSON_URL`);
 } else {
@@ -12,14 +65,17 @@ if (_.isNil(KIDS_RADIO_SERVER_URL)) {
     .then(() => {
       RPIPlayer.syncFilesWithList()
         .then(() => {
-          console.log('synced========');
+          console.log('Sync complete!');
+          console.log('========');
         })
         .catch(console.error);
     })
     .catch(console.error);
 }
 
-// GPIOs (Buttons)
+/**
+ * Register GPIOs
+ */
 try {
   const wpi = require('node-wiring-pi');
   wpi.setup('gpio');
@@ -66,51 +122,6 @@ try {
   listenPin(26, () => {
     RPIPlayer.next();
   });
-
 } catch (err) {
-  console.log('wiring pi error, probably running NOT on rpi hardware');
+  console.log('wiring pi error, probably running NOT on rpi hardware. This is probably ok, if you are developing.');
 }
-
-// Web Server
-const PORT = 80;
-const HOST = '0.0.0.0';
-
-const app = express();
-app.set('view engine', 'pug');
-app.set('views', './views');
-app.get('/', (req, res) => {
-  res.render('index.pug', {title: 'Kids-Radio'});
-});
-
-app.get('/status', (req, res) => {
-  res.send(RPIPlayer.getCurrentFileObject());
-});
-app.get('/1', (req, res) => {
-  RPIPlayer.previous();
-  res.send(RPIPlayer.getCurrentFileObject());
-});
-app.get('/2', (req, res) => {
-  RPIPlayer.stop();
-  res.send('STOP');
-});
-app.get('/stop', (req, res) => {
-  RPIPlayer.stop();
-  res.send(`stopped`);
-});
-app.get('/3', (req, res) => {
-  RPIPlayer.play();
-  res.send('PLAY');
-});
-app.get('/4', (req, res) => {
-  RPIPlayer.next();
-  res.send(RPIPlayer.getCurrentFileObject());
-});
-app.get('/url/:url', (req, res) => {
-  const url = req.params.url;
-  RPIPlayer.play(url);
-  res.send(`playing ${url}`);
-});
-
-app.listen(PORT, HOST);
-RPIPlayer.playFile('./assets/radio_bereit.mp3');
-console.log(`Running on http://${HOST}:${PORT}`);

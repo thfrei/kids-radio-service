@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const request = require('request');
+const fetch = require('node-fetch');
 const path = require('path');
 const fs = require('fs');
 const sha256File = require('sha256-file');
@@ -30,41 +30,44 @@ class RpiPlayer {
     this.files = files;
   }
 
+  /**
+   * Helper function for fetch
+   * @param res
+   * @returns {{ok}|*}
+   */
+  checkStatus(res) {
+    if (res.ok) { // res.status >= 200 && res.status < 300
+      return res;
+    } else {
+      throw new Error(`HTTP Error: ${res.statusText}`);
+    }
+  }
+
+  /**
+   * Downloads a file
+   *
+   * Source: https://github.com/node-fetch/node-fetch/issues/375#issuecomment-385751664
+   * @param filePath
+   * @param url
+   * @returns {Promise<void>}
+   */
   async downloadFile(filePath, url) {
-    /* source: https://learnscraping.com/how-to-download-files-with-nodejs-using-request/ */
-    /* Create an empty file where we can save data */
-    let file = fs.createWriteStream(filePath);
     /* Using Promises so that we can use the ASYNC AWAIT syntax */
-    await new Promise((resolve, reject) => {
-      let stream = request({
-        /* Here you should specify the exact link to the file you are trying to download */
-        uri: url,
-        headers: {
-          'Cache-Control': 'max-age=0',
-          'Connection': 'keep-alive',
-          'Upgrade-Insecure-Requests': '1',
-        },
-        /* GZIP true for most of the websites now, disable it if you don't need it */
-        gzip: true
-      })
-        .pipe(file)
-        .on('response', (response) => {
-          console.log('resp');
-        })
-        .on('data', (data) => {
-          console.log('data');
-        })
-        .on('finish', () => {
-          console.log(`The file is finished downloading.`);
+    try {
+      const res = await fetch(url);
+      await new Promise((resolve, reject) => {
+        const fileStream = fs.createWriteStream(filePath);
+        res.body.pipe(fileStream);
+        res.body.on("error", (err) => {
+          reject(err);
+        });
+        fileStream.on("finish", function () {
           resolve();
-        })
-        .on('error', (error) => {
-          reject(error);
-        })
-    })
-    .catch(error => {
-      console.log(`Something happened: ${error}`);
-    });
+        });
+      });
+    } catch (err) {
+      console.log('err, in downloadfile', err);
+    }
   }
 
   downloadList() {
@@ -87,12 +90,15 @@ class RpiPlayer {
       const listFilePath = this.createFilePath(this.listFileName);
       const listFile = fs.existsSync(listFilePath);
       if(listFile) {
-        const list = require(listFilePath);
+        const listRaw = fs.readFileSync(listFilePath);
+        const list = JSON.parse(listRaw);
         this.setFiles(list);
+        let i = 1;
         for (let entry of list) {
-          console.log(`* === working on ${entry.song.file} =====================`);
+          console.log(`* === ${i}/${list.length} === working on ${entry.song.file} =====================`);
           await this.syncFileObject(entry.info);
           await this.syncFileObject(entry.song);
+          i++;
         }
         this.setFiles(list);
       }
