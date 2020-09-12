@@ -20,7 +20,7 @@
     "lodash": "4.17.15",
     "md5-file": "5.0.0",
     "minimist": "^1.2.5",
-    "node-fetch": "2.6.0",
+    "node-fetch": "2.6.1",
     "node-omxplayer": "0.6.1",
     "node-wiring-pi": "0.0.5",
     "play-sound": "1.1.3",
